@@ -1,0 +1,45 @@
+{
+    "manifest_version": 3,
+    "name": "Sitecore XM Cloud Helper",
+    "version": "1.0.0",
+    "description": "Adds helpful features to the Sitecore XM CLoud to improve usability and efficiency for content editors and developers.",
+    "action": {
+        "default_icon": {
+            "16": "images/icon_16x16.png",
+            "32": "images/icon_32x32.png",
+            "48": "images/icon_48x48.png",
+            "128": "images/icon_128x128.png"
+        },
+        "default_title": "Sitecore Workbox Helper",
+        "default_popup": "settings.html"
+    },
+    "permissions": [
+        "storage",
+        "activeTab",
+        "scripting"
+    ],
+   "web_accessible_resources": [{
+        "resources": ["crypto-js-min.js"],
+        "matches": ["<all_urls>"]
+    }],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "js": ["content-script.js"],
+            "matches": [
+                "*://*/sitecore/shell*",
+                "*://*/sitecore/client/*"
+            ],
+            "run_at": "document_end",
+            "all_frames": true
+        }
+    ],
+    "icons": {
+        "16": "images/icon_16x16.png",
+        "32": "images/icon_32x32.png",
+        "48": "images/icon_48x48.png",
+        "128": "images/icon_128x128.png"
+    }
+}
