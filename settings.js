@@ -2,28 +2,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const saveSettingsBtn = document.getElementById('save-settings');
     const resetSettingsBtn = document.getElementById('reset-keys');
     const statusMessage = document.getElementById('status-message');
-
+    const ENCRYPTION_KEY = 'FhxImvR3U4uIZUSR';
     // Load saved settings
     loadSettings();
 
     // Save settings
     saveSettingsBtn.addEventListener('click', async function() {
         try {
-            const devApiKey = document.getElementById('dev-api-key').value.trim();
-            const qaApiKey = document.getElementById('qa-api-key').value.trim();
-            const prodApiKey = document.getElementById('prod-api-key').value.trim();
-
             const settings = {
                 dev: {
-                    apiKey: devApiKey ? await encryptText(devApiKey) : '',
+                    apiKey: encryptString(document.getElementById('dev-api-key').value.trim()),
                     domain: document.getElementById('dev-domain').value.trim()
                 },
                 qa: {
-                    apiKey: qaApiKey ? await encryptText(qaApiKey) : '',
+                    apiKey: encryptString(document.getElementById('qa-api-key').value.trim()),
                     domain: document.getElementById('qa-domain').value.trim()
                 },
                 prod: {
-                    apiKey: prodApiKey ? await encryptText(prodApiKey) : '',
+                    apiKey: encryptString(document.getElementById('prod-api-key').value.trim()),
                     domain: document.getElementById('prod-domain').value.trim()
                 }
             };
@@ -36,8 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
             showStatus('Error saving settings', 'error');
         }
     });
-     // Reset settings
-     resetSettingsBtn.addEventListener('click', async function() {
+     
+    // Reset settings
+    resetSettingsBtn.addEventListener('click', async function() {
         try {
             // Clear all input fields
             document.getElementById('dev-api-key').value = '';
@@ -56,41 +53,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Helper function to encrypt via background script
-    function encryptText(text) {
-        return new Promise((resolve) => {
-            chrome.runtime.sendMessage(
-                { action: 'encrypt', text: text },
-                (response) => {
-                    if (chrome.runtime.lastError) {
-                        console.error('Encryption error:', chrome.runtime.lastError);
-                        resolve('');
-                    } else {
-                        resolve(response.result);
-                    }
-                }
-            );
-        });
-    }
-
     // Load settings from storage
     function loadSettings() {
         chrome.storage.local.get(['environments'], function(data) {
             const envs = data.environments || {};
             
             if (envs.dev) {
-                document.getElementById('dev-api-key').value = envs.dev.apiKey || '';
+                document.getElementById('dev-api-key').value = envs.dev.apiKey ? decryptString(envs.dev.apiKey) : '';
                 document.getElementById('dev-domain').value = envs.dev.domain || '';
             }
             if (envs.qa) {
-                document.getElementById('qa-api-key').value = envs.qa.apiKey || '';
+                document.getElementById('qa-api-key').value = envs.qa.apiKey ? decryptString(envs.qa.apiKey) : '';
                 document.getElementById('qa-domain').value = envs.qa.domain || '';
             }
             if (envs.prod) {
-                document.getElementById('prod-api-key').value = envs.prod.apiKey || '';
+                document.getElementById('prod-api-key').value = envs.prod.apiKey ? decryptString(envs.prod.apiKey) : '';
                 document.getElementById('prod-domain').value = envs.prod.domain || '';
             }
         });
+    }
+    // Encryption function
+    function encryptString(str) {
+        if (!str) return '';
+        return CryptoJS.AES.encrypt(str, ENCRYPTION_KEY).toString();
+    }
+
+    // Decryption function
+    function decryptString(encryptedStr) {
+        if (!encryptedStr) return '';
+        try {
+            const bytes = CryptoJS.AES.decrypt(encryptedStr, ENCRYPTION_KEY);
+            return bytes.toString(CryptoJS.enc.Utf8);
+        } catch (e) {
+            console.error('Decryption error:', e);
+            return '';
+        }
     }
 
     // Show status message

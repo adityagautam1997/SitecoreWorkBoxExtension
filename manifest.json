@@ -18,16 +18,12 @@
         "activeTab",
         "scripting"
     ],
-   "web_accessible_resources": [{
-        "resources": ["crypto-js-min.js"],
-        "matches": ["<all_urls>"]
-    }],
     "background": {
         "service_worker": "background.js"
     },
     "content_scripts": [
         {
-            "js": ["content-script.js"],
+            "js": ["crypto-js-min.js","content-script.js"],
             "matches": [
                 "*://*/sitecore/shell*",
                 "*://*/sitecore/client/*"
